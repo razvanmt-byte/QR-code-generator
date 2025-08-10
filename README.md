@@ -1,51 +1,11 @@
-import qrcode
-import numpy as np
-import trimesh
-from trimesh.creation import box
-from trimesh.scene import Scene
+I have attached two text documents here. The first contains my proposed Python code for generating 3D-printable QR codes, which can be customized by replacing the existing link with the one you want. You can also adjust the size of the code by modifying the parameters directly in the code. The second text document contains the prompt you can use directly in the ChatGPT chat to generate a correct and identical file every time.
 
-# Generate QR code image
-qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
-qr.add_data('https://linktr.ee/Mititelu_Razvan')
-qr.make()
-matrix = np.array(qr.get_matrix(), dtype=int)
+1-Copy the text from document ,,prompt,, or document ,,Cod,,.
 
-# Constants
-qr_size = 25.0  # mm
-base_thickness = 2.0  # mm
-module_thickness = 1.0  # mm
-module_size = qr_size / matrix.shape[0]  # mm per module
+2-Paste the text into the ChatGPT chat.
 
-# Create the white base plate
-base_plate = box(extents=[qr_size, qr_size, base_thickness])
-base_plate.apply_translation([qr_size / 2, qr_size / 2, base_thickness / 2])
-base_plate.visual.face_colors = [255, 255, 255, 255]  # White
+3-Replace the existing link with your desired link.
 
-# Create black QR code modules
-black_modules = []
-rows, cols = matrix.shape
-for y in range(rows):
-    for x in range(cols):
-        if matrix[y, x] == 1:
-            block = box(extents=[module_size, module_size, module_thickness])
-            block.apply_translation([
-                (x + 0.5) * module_size,
-                (rows - y - 0.5) * module_size,
-                base_thickness + module_thickness / 2
-            ])
-            block.visual.face_colors = [0, 0, 0, 255]  # Black
-            black_modules.append(block)
+4-After the file has been generated, it must be downloaded and inserted into a slicing program such as Bambu Studio or PrusaSlicer.
 
-# Combine black modules into one mesh
-qr_code_mesh = trimesh.util.concatenate(black_modules)
-
-# Create scene with two separate geometries
-scene = Scene()
-scene.add_geometry(base_plate, node_name='White_Base')
-scene.add_geometry(qr_code_mesh, node_name='Black_QR_Modules')
-
-# Export as a single OBJ file with two objects
-output_path = "/mnt/data/qr_code_plate.obj"
-scene.export(output_path)
-
-output_path
+5-If the colors are not recognized automatically, you need to manually select the “Split to parts” command, then change the color of the first part, which represents the base plate color. The remaining parts in the file correspond to each component of the code and should preferably remain in the default black color.
